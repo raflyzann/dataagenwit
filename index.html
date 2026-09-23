@@ -605,11 +605,9 @@
         try {
           return JSON.parse(text);
         } catch (e) {
+          const snippet = (text || '(kosong)').slice(0, 200);
           throw new Error(
-            'Deployment Apps Script belum bisa diakses publik. ' +
-            'Buka Apps Script > Deploy > Manage deployments, pastikan ' +
-            '"Who has access" = "Anyone", lalu Deploy ulang sebagai versi baru ' +
-            'dan pastikan API_URL di index.html sesuai URL /exec terbaru.'
+            'Respons server bukan JSON (HTTP ' + res.status + '). Isi respons: ' + snippet
           );
         }
       });
