@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin — Wahdah Islamic Travel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --emerald: #0F5132; --emerald-dark: #0A3D24; --emerald-light: #17714A;
+      --gold: #C9A227; --gold-soft: #F1E4B8; --sand: #FAF6EC;
+      --ink: #1C2B22; --ink-soft: #5B6B60; --sage: #DCE7DD; --clay: #A8492F;
+      --white: #FFFFFF; --radius: 14px; --shadow: 0 10px 30px rgba(15, 81, 50, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--sand); color: var(--ink); -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { font-family: 'Amiri', serif; }
+
+    header.top { background: linear-gradient(135deg, var(--emerald-dark), var(--emerald)); color: var(--white); padding: 36px 24px 0; text-align: center; }
+    .brand-eyebrow { letter-spacing: 3px; font-size: 11px; text-transform: uppercase; color: var(--gold-soft); font-weight: 700; margin-bottom: 8px; }
+    header.top h1 { font-size: clamp(26px, 4vw, 38px); margin: 0 0 6px; font-weight: 700; }
+    header.top p { margin: 0 0 20px; color: rgba(255,255,255,0.82); font-size: 14.5px; }
+    .arch-divider { display: block; width: 100%; height: 34px; }
+    a.back, .logout { color: var(--gold-soft); font-size: 12.5px; text-decoration: underline; background: none; border: 0; font-family: inherit; cursor: pointer; margin: 0 7px 18px; display: inline-block; }
+
+    main { max-width: 1080px; margin: -2px auto 60px; padding: 24px 20px 0; }
+    .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; margin-bottom: 20px; }
+    .section-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); font-weight: 800; margin: 0 0 4px; }
+    .section-heading { font-size: 19px; margin: 0 0 18px; color: var(--emerald-dark); font-weight: 700; padding-bottom: 14px; border-bottom: 1px solid var(--sage); }
+    .card h3.ch { font-size: 16px; margin: 0 0 12px; color: var(--emerald-dark); }
+
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: var(--white); border-radius: 12px; box-shadow: var(--shadow); padding: 18px; border-top: 3px solid var(--gold); }
+    .stat-card .num { font-size: 26px; font-weight: 800; color: var(--emerald-dark); font-family: 'Amiri', serif; }
+    .stat-card .lbl { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-top: 2px; }
+    .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    @media (max-width: 720px) { .stats-row, .grid2 { grid-template-columns: repeat(2, 1fr); } .grid2 { grid-template-columns: 1fr; } .card { padding: 20px; } }
+
+    /* TAB BAR */
+    .tabbar { display: flex; gap: 6px; background: var(--white); border-radius: 16px; box-shadow: var(--shadow); padding: 6px; margin-bottom: 20px; overflow-x: auto; }
+    .tabbar button { flex: 1 0 auto; font-family: inherit; font-size: 13.5px; font-weight: 700; padding: 12px 16px; border: 0; border-radius: 12px; background: transparent; color: var(--ink-soft); cursor: pointer; white-space: nowrap; transition: background .2s, color .2s; }
+    .tabbar button.active { background: var(--emerald); color: var(--white); }
+    .panel { display: none; animation: fadeIn .3s ease; }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .toolbar { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+    .toolbar .lbl { font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-right: 8px; }
+    .seg { display: inline-flex; background: var(--sand); border: 1px solid var(--sage); border-radius: 10px; overflow: hidden; }
+    .seg button { font-family: inherit; font-size: 13px; font-weight: 700; padding: 9px 16px; border: 0; background: transparent; color: var(--ink-soft); cursor: pointer; }
+    .seg button.active { background: var(--emerald); color: var(--white); }
+    .btn-line, .btn { font-family: inherit; font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 10px; cursor: pointer; }
+    .btn-line { border: 1px solid var(--emerald); background: var(--white); color: var(--emerald); }
+    .btn-line:hover { background: var(--emerald); color: var(--white); }
+    .btn { border: 0; background: var(--emerald); color: var(--white); }
+    .btn.gold { background: var(--gold); color: var(--ink); }
+    .btn:disabled { opacity: .6; cursor: wait; }
+    .push-r { margin-left: auto; }
+    input[type=text], input[type=password], select { font-family: inherit; font-size: 13.5px; padding: 10px 12px; border: 1px solid var(--sage); border-radius: 10px; background: var(--white); color: var(--ink); }
+    input:focus, select:focus { outline: 2px solid var(--emerald-light); }
+
+    .chart-wrap { position: relative; height: 380px; }
+    .cw { position: relative; height: 260px; }
+    .note { background: var(--gold-soft); border-left: 3px solid var(--gold); padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin-top: 16px; }
+    .note.hide { display: none; }
+    .empty-state { text-align: center; padding: 40px 10px; color: var(--ink-soft); }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x: auto; }
+    table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tbl th { text-align: left; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); padding: 10px 12px; border-bottom: 2px solid var(--sage); white-space: nowrap; }
+    .tbl td { padding: 10px 12px; border-bottom: 1px solid var(--sage); vertical-align: top; }
+    .tbl tr.click { cursor: pointer; }
+    .tbl tr.click:hover td { background: var(--sand); }
+    .tbl td.num, .tbl th.num { text-align: right; font-weight: 700; }
+    .badge { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
+    .badge.err { background: #F6DDD6; color: var(--clay); }
+    .badge.warn { background: var(--gold-soft); color: #7a5f00; }
+    .badge.ok { background: var(--sage); color: var(--emerald-dark); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip { font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 12px; border-radius: 99px; border: 1px solid var(--sage); background: var(--white); color: var(--ink-soft); cursor: pointer; }
+    .chip.active { background: var(--emerald); color: var(--white); border-color: var(--emerald); }
+    ul.names { margin: 6px 0 2px; padding-left: 18px; color: var(--ink-soft); font-size: 12.5px; }
+    details.und summary { cursor: pointer; font-weight: 700; color: var(--emerald); font-size: 13px; margin-top: 14px; }
+
+    /* LOGIN */
+    #loginView { max-width: 380px; margin: 0 auto; text-align: center; }
+    #loginView input { width: 100%; margin: 8px 0 12px; }
+    #loginView .btn { width: 100%; padding: 12px; font-size: 14px; }
+    .error { color: var(--clay); font-size: 13px; font-weight: 600; margin-top: 10px; min-height: 18px; }
+    #dashView { display: none; }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .filters input[type=text] { flex: 1; min-width: 200px; }
+    footer { text-align: center; color: var(--ink-soft); font-size: 12.5px; padding-bottom: 30px; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand-eyebrow">Wahdah Islamic Travel</div>
+    <h1>Halaman Admin Agen Marketing</h1>
+    <p>Tren, profil, wilayah, referral, kualitas data, dan ekspor</p>
+    <div id="headerLinks" style="display:none">
+      <a class="back" href="index.html">← Dashboard Agen</a>
+      <button class="logout" onclick="logout()">Keluar</button>
+    </div>
+    <svg class="arch-divider" viewBox="0 0 120 34" preserveAspectRatio="none">
+      <defs><pattern id="archPattern" width="40" height="34" patternUnits="userSpaceOnUse"><path d="M0,34 L0,17 A20,17 0 0,1 40,17 L40,34 Z" fill="#FAF6EC"/></pattern></defs>
+      <rect width="100%" height="100%" fill="url(#archPattern)"/>
+    </svg>
+  </header>
+
+  <main>
+    <!-- LOGIN -->
+    <div class="card" id="loginView">
+      <div class="section-title">Akses Admin</div>
+      <h2 class="section-heading">Masukkan Password</h2>
+      <input type="password" id="pwInput" placeholder="Password admin" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+      <button class="btn" id="loginBtn" onclick="login()">Masuk</button>
+      <div class="error" id="loginError"></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashView">
+      <div class="stats-row">
+        <div class="stat-card"><div class="num" id="sAgen">–</div><div class="lbl">Total Agen Perorangan</div></div>
+        <div class="stat-card"><div class="num" id="sLembaga">–</div><div class="lbl">Total Agen Lembaga</div></div>
+        <div class="stat-card"><div class="num" id="sBulanIni">–</div><div class="lbl">Pendaftar Bulan Ini</div></div>
+        <div class="stat-card"><div class="num" id="sRata">–</div><div class="lbl">Rata-rata / Bulan</div></div>
+      </div>
+
+      <div class="tabbar" id="tabbar">
+        <button data-t="tren" class="active" onclick="showTab('tren')">📈 Tren</button>
+        <button data-t="profil" onclick="showTab('profil')">👥 Profil</button>
+        <button data-t="wilayah" onclick="showTab('wilayah')">📍 Wilayah</button>
+        <button data-t="referral" onclick="showTab('referral')">🤝 Referral</button>
+        <button data-t="kualitas" onclick="showTab('kualitas')">🧹 Kualitas Data</button>
+        <button data-t="ekspor" onclick="showTab('ekspor')">⬇️ Ekspor</button>
+      </div>
+
+      <!-- TREN -->
+      <section class="panel active" id="p-tren">
+        <div class="card">
+          <div class="section-title">Tren</div>
+          <h2 class="section-heading">Grafik Pendaftaran Agen</h2>
+          <div class="toolbar">
+            <div><span class="lbl">Periode</span>
+              <div class="seg" id="segGran">
+                <button data-v="day" onclick="setGran('day')">Harian</button>
+                <button data-v="week" onclick="setGran('week')">Mingguan</button>
+                <button data-v="month" class="active" onclick="setGran('month')">Bulanan</button>
+              </div>
+            </div>
+            <div><span class="lbl">Tampilan</span>
+              <div class="seg" id="segMode">
+                <button data-v="period" class="active" onclick="setMode('period')">Per Periode</button>
+                <button data-v="cum" onclick="setMode('cum')">Kumulatif</button>
+              </div>
+            </div>
+            <button class="btn-line push-r" onclick="reloadData()">⟳ Muat Ulang</button>
+          </div>
+          <div class="chart-wrap" id="trenWrap"><canvas id="trendChart"></canvas></div>
+          <div class="empty-state" id="trenEmpty" style="display:none">Belum ada data bertanggal untuk ditampilkan.</div>
+          <div class="note hide" id="noteNoDate"></div>
+        </div>
+      </section>
+
+      <!-- PROFIL -->
+      <section class="panel" id="p-profil">
+        <div class="grid2">
+          <div class="card"><h3 class="ch">Jenis Kelamin (Agen)</h3><div class="cw"><canvas id="cGender"></canvas></div></div>
+          <div class="card"><h3 class="ch">Masuk Kepengurusan Wahdah (Agen)</h3><div class="cw"><canvas id="cKep"></canvas></div></div>
+          <div class="card"><h3 class="ch">Kelompok Usia (Agen)</h3><div class="cw"><canvas id="cUsia"></canvas></div><div class="note hide" id="usiaNote"></div></div>
+          <div class="card"><h3 class="ch">PJ Ditunjuk (Agen Lembaga)</h3><div class="cw"><canvas id="cPJ"></canvas></div></div>
+        </div>
+        <div class="card"><h3 class="ch">Pekerjaan Agen (8 teratas)</h3><div class="cw" id="cwPekerjaan"><canvas id="cPekerjaan"></canvas></div></div>
+      </section>
+
+      <!-- WILAYAH -->
+      <section class="panel" id="p-wilayah">
+        <div class="card">
+          <div class="section-title">Sebaran</div>
+          <h2 class="section-heading">Wilayah Agen</h2>
+          <div class="toolbar">
+            <div><span class="lbl">Data</span>
+              <div class="seg" id="segWil">
+                <button data-v="agen" class="active" onclick="setWil('agen')">Agen</button>
+                <button data-v="lembaga" onclick="setWil('lembaga')">Lembaga</button>
+                <button data-v="all" onclick="setWil('all')">Gabungan</button>
+              </div>
+            </div>
+          </div>
+          <div class="cw" id="cwWilayah"><canvas id="cWilayah"></canvas></div>
+          <div class="note" id="wilNote"></div>
+          <div class="tbl-wrap" style="margin-top:18px" id="wilTable"></div>
+        </div>
+      </section>
+
+      <!-- REFERRAL -->
+      <section class="panel" id="p-referral">
+        <div class="card">
+          <div class="section-title">Jaringan</div>
+          <h2 class="section-heading">Top Perekrut Agen</h2>
+          <div class="stats-row" style="grid-template-columns:repeat(3,1fr)" id="refStats"></div>
+          <div class="cw" id="cwRef"><canvas id="cRef"></canvas></div>
+          <div class="tbl-wrap" style="margin-top:18px" id="refTable"></div>
+        </div>
+      </section>
+
+      <!-- KUALITAS -->
+      <section class="panel" id="p-kualitas">
+        <div class="card">
+          <div class="section-title">Pemeriksaan</div>
+          <h2 class="section-heading">Kualitas Data</h2>
+          <div class="stats-row" style="grid-template-columns:repeat(3,1fr)" id="qStats"></div>
+          <div class="chips" id="qChips"></div>
+          <div class="toolbar"><button class="btn-line push-r" onclick="exportIssues()">⬇ Unduh Daftar Masalah (CSV)</button></div>
+          <div class="tbl-wrap" id="qTable"></div>
+        </div>
+      </section>
+
+      <!-- EKSPOR -->
+      <section class="panel" id="p-ekspor">
+        <div class="card">
+          <div class="section-title">Laporan</div>
+          <h2 class="section-heading">Ekspor Data</h2>
+          <div class="toolbar">
+            <div><span class="lbl">Data</span>
+              <div class="seg" id="segExp">
+                <button data-v="agen" class="active" onclick="setExp('agen')">Agen Perorangan</button>
+                <button data-v="lembaga" onclick="setExp('lembaga')">Agen Lembaga</button>
+              </div>
+            </div>
+          </div>
+          <div class="filters">
+            <input type="text" id="expSearch" placeholder="Cari di semua kolom..." oninput="renderEkspor()">
+            <select id="expGender" onchange="renderEkspor()"><option value="">Semua Jenis Kelamin</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select>
+            <select id="expKep" onchange="renderEkspor()"><option value="">Semua Kepengurusan</option><option value="Ya">Ya</option><option value="Tidak">Tidak</option></select>
+            <select id="expPJ" onchange="renderEkspor()" style="display:none"><option value="">Semua (PJ)</option><option value="ada">Ada PJ</option><option value="tanpa">Tanpa PJ</option></select>
+            <select id="expKota" onchange="renderEkspor()"></select>
+          </div>
+          <div id="expInfo" style="font-size:13px;color:var(--ink-soft);margin-bottom:12px"></div>
+          <div class="toolbar">
+            <button class="btn" onclick="downloadExcel()">⬇ Unduh Excel (.xlsx)</button>
+            <button class="btn gold" onclick="downloadCsv()">⬇ Unduh CSV</button>
+          </div>
+          <div class="note">Gunakan Excel agar nomor WhatsApp &amp; rekening berawalan 0 tidak berubah. File berisi data pribadi (WhatsApp, rekening); simpan dan bagikan dengan hati-hati.</div>
+          <div class="tbl-wrap" style="margin-top:16px" id="expPreview"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>© Wahdah Islamic Travel — Halaman Admin</footer>
+
+  <script>
+    // Samakan dengan API_URL di index.html
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxHx3AQcWVhXZAFmIfRG6oowLcHrmG1fdQX2A4O3uKrFncsMLOh7WEPhbhFy9woogEC/exec';
+
+    const AGEN_COLS = ['NO','NAMA LENGKAP','NAMA AGEN YANG MENGAJAK','TEMPAT TANGGAL LAHIR','JENIS KELAMIN','ALAMAT','NO WHATSAPP','PEKERJAAN','NAMA BANK','NO REKENING','MASUK KEPENGURUSAN WAHDAH','NAMA LEMBAGA','AMANAH'];
+    const LEMBAGA_COLS = ['NO','NAMA LEMBAGA','NAMA KETUA LEMBAGA','ALAMAT KANTOR/SEKRETARIAT','NAMA BANK','NO REKENING LEMBAGA','PJ YANG DITUNJUK LANGSUNG OLEH KETUA (JIKA ADA)','NO WA KETUA/PJ LEMBAGA'];
+    const PJ_COL = 'PJ YANG DITUNJUK LANGSUNG OLEH KETUA (JIKA ADA)';
+
+    let DATA = null, currentTab = 'tren', gran = 'month', mode = 'period', wilMode = 'agen', expDs = 'agen', qFilter = '', qIssues = [];
+    const charts = {};
+    const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const PALETTE = ['#0F5132','#C9A227','#17714A','#A8492F','#5B6B60','#E0C46A','#7FB59A','#8C6D1F','#B9CDBE'];
+
+    /* ================= UTIL ================= */
+    const $ = id => document.getElementById(id);
+    const str = v => (v === null || v === undefined) ? '' : String(v).trim();
+    function esc(v) { const d = document.createElement('div'); d.textContent = str(v); return d.innerHTML; }
+    function normName(s) { return str(s).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim(); }
+    function firstNumber(v) { return str(v).split(/[\/,;]/)[0]; }
+    function normPhone(v) {
+      let d = firstNumber(v).replace(/\D/g, '');
+      if (!d) return '';
+      if (d.startsWith('62')) return d;
+      if (d.startsWith('0')) return '62' + d.slice(1);
+      if (d.startsWith('8')) return '62' + d;
+      return d;
+    }
+    const phoneValid = n => /^628\d{8,12}$/.test(n);
+    const digits = v => str(v).replace(/\D/g, '');
+    function gender(v) {
+      const g = str(v).toLowerCase();
+      if (g.startsWith('laki') || g.startsWith('pria')) return 'Laki-laki';
+      if (g.startsWith('perempuan') || g.startsWith('wanita')) return 'Perempuan';
+      return 'Tidak diisi';
+    }
+    const kep = v => str(v).toLowerCase() === 'ya' ? 'Ya' : 'Tidak';
+    function birthYear(v) { const m = str(v).match(/(19\d{2}|20[0-2]\d)/); return m ? +m[1] : null; }
+
+    function groupCount(items, rawFn, keyFn) {
+      const m = new Map();
+      items.forEach(it => {
+        const raw = str(rawFn(it)), key = keyFn(raw);
+        if (key === null || key === '') return;
+        let g = m.get(key);
+        if (!g) { g = { key, count: 0, spell: new Map(), items: [] }; m.set(key, g); }
+        g.count++; g.items.push(it); g.spell.set(raw, (g.spell.get(raw) || 0) + 1);
+      });
+      return [...m.values()].map(g => {
+        let best = '', bc = 0;
+        g.spell.forEach((c, s) => { if (c > bc) { bc = c; best = s; } });
+        g.label = best; return g;
+      }).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+    }
+
+    /* ================= WILAYAH (deteksi kota dari alamat) ================= */
+    const STOP = new Set(['prov','provinsi','sulawesi','sulsel','sul','kec','kecamatan','kel','kelurahan','desa','rt','rw','no','nomor','jl','jln','jalan','kode','pos','indonesia','dusun','lingkungan','blok','perumahan','perum','komp','kompleks','gang','gg']);
+    const CITY_LIST = ['Makassar','Gowa','Maros','Takalar','Pangkep','Pangkajene','Bone','Soppeng','Wajo','Sidrap','Sidenreng Rappang','Pinrang','Enrekang','Luwu Utara','Luwu Timur','Luwu','Palopo','Tana Toraja','Toraja Utara','Bulukumba','Bantaeng','Jeneponto','Sinjai','Barru','Selayar','Parepare','Pare-Pare','Kendari','Palu','Manado','Gorontalo','Mamuju','Majene','Polewali Mandar','Mamasa','Baubau','Bau-Bau','Kolaka','Jakarta','Bekasi','Depok','Tangerang','Bogor','Bandung','Surabaya','Medan','Balikpapan','Samarinda','Banjarmasin','Yogyakarta','Semarang','Pekanbaru','Palembang','Batam']
+      .sort((a, b) => b.length - a.length);
+    const CITY_ALIAS = { 'parepare': 'Parepare', 'pare pare': 'Parepare', 'baubau': 'Baubau', 'bau bau': 'Baubau', 'ujung pandang': 'Makassar', 'pangkajene': 'Pangkep', 'sidenreng rappang': 'Sidrap' };
+    function titleCase(s) { return s.toLowerCase().replace(/(^|[\s\-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase()); }
+    function canonCity(name) {
+      const k = name.toLowerCase().replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+      return CITY_ALIAS[k] || titleCase(k);
+    }
+    function extractCity(addr) {
+      const a = str(addr);
+      if (!a) return '';
+      const m = a.match(/\b(?:kota|kab\.?|kabupaten)\s+([A-Za-z][A-Za-z\s\-]*)/i);
+      if (m) {
+        const toks = [];
+        for (const t of m[1].trim().split(/\s+/)) {
+          if (STOP.has(t.toLowerCase()) || toks.length >= 3) break;
+          toks.push(t);
+        }
+        if (toks.length) return canonCity(toks.join(' '));
+      }
+      const low = a.toLowerCase();
+      for (const c of CITY_LIST) {
+        const re = new RegExp('(^|[^a-z])' + c.toLowerCase().replace(/[-\s]/g, '[-\\s]?') + '([^a-z]|$)');
+        if (re.test(low)) return canonCity(c);
+      }
+      return '';
+    }
+
+    /* ================= API ================= */
+    function apiPost(payload) {
+      return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
+        .then(r => r.text()).then(t => {
+          try { return JSON.parse(t); }
+          catch (e) { throw new Error('Respons server bukan JSON. Pastikan Apps Script sudah di-deploy ulang (versi terbaru).'); }
+        });
+    }
+    function fetchAdmin(pw) { return apiPost({ action: 'getAdminData', password: pw }); }
+
+    function prepare(raw) {
+      const agen = (raw.agen || []).filter(r => str(r['NAMA LENGKAP']));
+      const lembaga = (raw.lembaga || []).filter(r => str(r['NAMA LEMBAGA']));
+      agen.forEach(r => { r._kota = extractCity(r['ALAMAT']); });
+      lembaga.forEach(r => { r._kota = extractCity(r['ALAMAT KANTOR/SEKRETARIAT']); });
+      return { agen, lembaga, trend: raw.trend };
+    }
+
+    /* ================= LOGIN ================= */
+    function login() {
+      const pw = $('pwInput').value;
+      if (!pw) return;
+      const btn = $('loginBtn'), err = $('loginError');
+      btn.disabled = true; btn.textContent = 'Memeriksa...'; err.textContent = '';
+      fetchAdmin(pw).then(res => {
+        if (!res.success) throw new Error(res.message);
+        sessionStorage.setItem('adminPw', pw);
+        showDash(res.data);
+      }).catch(e => { err.textContent = e.message; })
+        .finally(() => { btn.disabled = false; btn.textContent = 'Masuk'; });
+    }
+    function logout() { sessionStorage.removeItem('adminPw'); location.reload(); }
+    function showDash(raw) {
+      $('loginView').style.display = 'none';
+      $('dashView').style.display = 'block';
+      $('headerLinks').style.display = 'block';
+      DATA = prepare(raw);
+      renderStats(); renderTab(currentTab);
+    }
+    function reloadData() {
+      fetchAdmin(sessionStorage.getItem('adminPw')).then(res => {
+        if (!res.success) throw new Error(res.message);
+        DATA = prepare(res.data); renderStats(); renderTab(currentTab);
+      }).catch(e => alert(e.message));
+    }
+
+    /* ================= TAB ================= */
+    function showTab(t) {
+      currentTab = t;
+      document.querySelectorAll('#tabbar button').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'p-' + t));
+      renderTab(t);
+    }
+    function renderTab(t) {
+      if (!DATA) return;
+      ({ tren: renderTren, profil: renderProfil, wilayah: renderWilayah, referral: renderReferral, kualitas: renderKualitas, ekspor: renderEkspor })[t]();
+    }
+    function renderStats() {
+      const all = DATA.trend.agen.dates.concat(DATA.trend.lembaga.dates);
+      $('sAgen').textContent = DATA.agen.length;
+      $('sLembaga').textContent = DATA.lembaga.length;
+      const now = new Date(), cur = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+      $('sBulanIni').textContent = all.filter(s => s.startsWith(cur)).length;
+      if (!all.length) { $('sRata').textContent = '–'; return; }
+      const ds = all.map(parseIso).sort((a, b) => a - b);
+      const span = (ds[ds.length - 1].getFullYear() - ds[0].getFullYear()) * 12 + ds[ds.length - 1].getMonth() - ds[0].getMonth() + 1;
+      $('sRata').textContent = (all.length / span).toFixed(1).replace('.', ',');
+    }
+
+    /* ================= CHART HELPERS ================= */
+    function makeChart(key, id, cfg) { if (charts[key]) charts[key].destroy(); charts[key] = new Chart($(id), cfg); }
+    function doughnut(key, id, labels, values) {
+      makeChart(key, id, { type: 'doughnut', data: { labels, datasets: [{ data: values, backgroundColor: PALETTE, borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } });
+    }
+    function hbar(key, id, wrapId, labels, values, color) {
+      $(wrapId).style.height = Math.max(200, labels.length * 30 + 50) + 'px';
+      makeChart(key, id, { type: 'bar', data: { labels, datasets: [{ data: values, backgroundColor: color || '#0F5132', borderRadius: 6 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } } });
+    }
+
+    /* ================= TREN ================= */
+    function parseIso(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+    function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function bucketStart(d, g) {
+      if (g === 'month') return new Date(d.getFullYear(), d.getMonth(), 1);
+      if (g === 'week') { const x = new Date(d); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; }
+      return new Date(d);
+    }
+    function nextBucket(d, g) { const x = new Date(d); if (g === 'month') x.setMonth(x.getMonth() + 1); else x.setDate(x.getDate() + (g === 'week' ? 7 : 1)); return x; }
+    function labelOf(d, g) {
+      if (g === 'month') return MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+      const t = d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + String(d.getFullYear()).slice(2);
+      return g === 'week' ? 'Mgg ' + t : t;
+    }
+    function renderTren() {
+      const A = DATA.trend.agen, L = DATA.trend.lembaga, all = A.dates.concat(L.dates);
+      const noDate = A.noDate + L.noDate, note = $('noteNoDate');
+      note.classList.toggle('hide', !noDate);
+      if (noDate) note.textContent = noDate + ' data (' + A.noDate + ' agen, ' + L.noDate + ' lembaga) belum memiliki TANGGAL DAFTAR sehingga tidak masuk grafik. Isi kolom tersebut di Google Sheet untuk melengkapi tren.';
+      if (!all.length) { $('trenWrap').style.display = 'none'; $('trenEmpty').style.display = 'block'; return; }
+      $('trenWrap').style.display = 'block'; $('trenEmpty').style.display = 'none';
+
+      const now = new Date(), ds = all.map(parseIso).sort((a, b) => a - b);
+      const start = bucketStart(ds[0], gran), end = bucketStart(new Date(Math.max(ds[ds.length - 1], now)), gran);
+      const keys = [];
+      for (let d = new Date(start); d <= end; d = nextBucket(d, gran)) keys.push(new Date(d));
+      const idx = {}; keys.forEach((d, i) => idx[iso(d)] = i);
+      const series = dates => {
+        const arr = new Array(keys.length).fill(0);
+        dates.forEach(s => { const k = iso(bucketStart(parseIso(s), gran)); if (k in idx) arr[idx[k]]++; });
+        if (mode === 'cum') for (let i = 1; i < arr.length; i++) arr[i] += arr[i - 1];
+        return arr;
+      };
+      const pr = keys.length > 40 ? 0 : 3;
+      makeChart('tren', 'trendChart', { type: 'line', data: { labels: keys.map(d => labelOf(d, gran)), datasets: [
+        { label: 'Agen Perorangan', data: series(A.dates), borderColor: '#0F5132', backgroundColor: 'rgba(15,81,50,0.12)', fill: true, tension: .3, pointRadius: pr },
+        { label: 'Agen Lembaga', data: series(L.dates), borderColor: '#C9A227', backgroundColor: 'rgba(201,162,39,0.14)', fill: true, tension: .3, pointRadius: pr } ] },
+        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          scales: { y: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: mode === 'cum' ? 'Total kumulatif' : 'Jumlah pendaftar' } }, x: { ticks: { maxRotation: 60, autoSkip: true, maxTicksLimit: 14 } } } } });
+    }
+    function setGran(v) { gran = v; setActive('segGran', v); renderTren(); }
+    function setMode(v) { mode = v; setActive('segMode', v); renderTren(); }
+    function setActive(id, v) { document.querySelectorAll('#' + id + ' button').forEach(b => b.classList.toggle('active', b.dataset.v === v)); }
+
+    /* ================= PROFIL ================= */
+    function ordered(items, rawFn, keyFn, order) {
+      const m = new Map(order.map(o => [o, 0]));
+      items.forEach(it => { const k = keyFn(rawFn(it)); m.set(k, (m.get(k) || 0) + 1); });
+      const keys = [...m.keys()].filter(k => m.get(k) > 0);
+      return [keys, keys.map(k => m.get(k))];
+    }
+    function renderProfil() {
+      const A = DATA.agen, L = DATA.lembaga;
+      let [k, v] = ordered(A, r => r['JENIS KELAMIN'], gender, ['Laki-laki', 'Perempuan', 'Tidak diisi']);
+      doughnut('gender', 'cGender', k, v);
+      [k, v] = ordered(A, r => r['MASUK KEPENGURUSAN WAHDAH'], kep, ['Ya', 'Tidak']);
+      doughnut('kep', 'cKep', k, v);
+      [k, v] = ordered(L, r => r[PJ_COL], x => str(x) ? 'Ada PJ' : 'Tanpa PJ', ['Ada PJ', 'Tanpa PJ']);
+      doughnut('pj', 'cPJ', k, v);
+
+      const yr = new Date().getFullYear(), buckets = [0, 0, 0, 0, 0, 0, 0];
+      A.forEach(r => {
+        const y = birthYear(r['TEMPAT TANGGAL LAHIR']), age = y ? yr - y : null;
+        if (age === null || age < 10 || age > 100) buckets[6]++;
+        else buckets[age < 20 ? 0 : age < 30 ? 1 : age < 40 ? 2 : age < 50 ? 3 : age < 60 ? 4 : 5]++;
+      });
+      makeChart('usia', 'cUsia', { type: 'bar', data: { labels: ['<20', '20–29', '30–39', '40–49', '50–59', '60+', 'Tidak terbaca'], datasets: [{ data: buckets, backgroundColor: '#0F5132', borderRadius: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+      const un = $('usiaNote'); un.classList.toggle('hide', !buckets[6]);
+      un.textContent = buckets[6] + ' agen tanggal lahirnya tidak terbaca (tahun tidak ditemukan).';
+
+      const g = groupCount(A, r => r['PEKERJAAN'], x => normName(x) || 'tidak diisi');
+      const top = g.slice(0, 8), rest = g.slice(8).reduce((s, x) => s + x.count, 0);
+      const labels = top.map(x => normName(x.label) ? x.label : 'Tidak diisi'), vals = top.map(x => x.count);
+      if (rest) { labels.push('Lainnya'); vals.push(rest); }
+      hbar('kerja', 'cPekerjaan', 'cwPekerjaan', labels, vals, '#C9A227');
+    }
+
+    /* ================= WILAYAH ================= */
+    function setWil(v) { wilMode = v; setActive('segWil', v); renderWilayah(); }
+    function renderWilayah() {
+      const rows = [];
+      if (wilMode !== 'lembaga') DATA.agen.forEach(r => rows.push({ nama: r['NAMA LENGKAP'], addr: r['ALAMAT'], kota: r._kota }));
+      if (wilMode !== 'agen') DATA.lembaga.forEach(r => rows.push({ nama: r['NAMA LEMBAGA'], addr: r['ALAMAT KANTOR/SEKRETARIAT'], kota: r._kota }));
+      const known = rows.filter(r => r.kota), unknown = rows.filter(r => !r.kota);
+      const g = groupCount(known, r => r.kota, x => x.toLowerCase());
+      const top = g.slice(0, 15);
+      hbar('wil', 'cWilayah', 'cwWilayah', top.map(x => x.label), top.map(x => x.count), '#0F5132');
+      $('wilNote').textContent = 'Wilayah dideteksi otomatis dari kolom alamat (kata "Kota/Kab." atau nama kota yang dikenal). Hasilnya perkiraan; ' + unknown.length + ' dari ' + rows.length + ' alamat belum terdeteksi.';
+      const tot = rows.length || 1;
+      let html = '<table class="tbl"><thead><tr><th>#</th><th>Wilayah</th><th class="num">Jumlah</th><th class="num">Persen</th></tr></thead><tbody>';
+      g.forEach((x, i) => { html += '<tr><td>' + (i + 1) + '</td><td>' + esc(x.label) + '</td><td class="num">' + x.count + '</td><td class="num">' + (x.count * 100 / tot).toFixed(1).replace('.', ',') + '%</td></tr>'; });
+      if (unknown.length) html += '<tr><td>–</td><td><em>Tidak terdeteksi</em></td><td class="num">' + unknown.length + '</td><td class="num">' + (unknown.length * 100 / tot).toFixed(1).replace('.', ',') + '%</td></tr>';
+      html += '</tbody></table>';
+      if (unknown.length) {
+        html += '<details class="und"><summary>Lihat ' + unknown.length + ' alamat yang belum terdeteksi</summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nama</th><th>Alamat</th></tr></thead><tbody>' +
+          unknown.map(r => '<tr><td>' + esc(r.nama) + '</td><td>' + (esc(r.addr) || '<em>kosong</em>') + '</td></tr>').join('') + '</tbody></table></div></details>';
+      }
+      $('wilTable').innerHTML = html;
+    }
+
+    /* ================= REFERRAL ================= */
+    const NO_REF = new Set(['', '-', '--', 'tidak ada', 'tidak', 'tdk ada', 'none', 'n a', 'na', 'langsung', 'mandiri', 'kosong', 'nihil', '0', 'gak ada', 'ga ada']);
+    let registeredNames = null;
+    function isRegistered(n) {
+      if (!registeredNames) registeredNames = DATA.agen.map(r => normName(r['NAMA LENGKAP']));
+      return registeredNames.some(x => x === n || x.startsWith(n + ' ') || n.startsWith(x + ' '));
+    }
+    function renderReferral() {
+      registeredNames = null;
+      const A = DATA.agen;
+      const g = groupCount(A, r => r['NAMA AGEN YANG MENGAJAK'], x => { const n = normName(x); return NO_REF.has(n) ? null : n; });
+      const withRef = g.reduce((s, x) => s + x.count, 0);
+      $('refStats').innerHTML =
+        '<div class="stat-card"><div class="num">' + g.length + '</div><div class="lbl">Perekrut Aktif</div></div>' +
+        '<div class="stat-card"><div class="num">' + withRef + '</div><div class="lbl">Agen Hasil Rekrutan</div></div>' +
+        '<div class="stat-card"><div class="num">' + (A.length - withRef) + '</div><div class="lbl">Tanpa Perekrut / Mandiri</div></div>';
+      if (!g.length) { $('cwRef').style.display = 'none'; $('refTable').innerHTML = '<div class="empty-state">Belum ada data perekrut.</div>'; return; }
+      $('cwRef').style.display = 'block';
+      const top = g.slice(0, 10);
+      hbar('ref', 'cRef', 'cwRef', top.map(x => x.label), top.map(x => x.count), '#0F5132');
+      let html = '<table class="tbl"><thead><tr><th>#</th><th>Perekrut</th><th class="num">Rekrutan</th><th>Status</th></tr></thead><tbody>';
+      g.forEach((x, i) => {
+        const ok = isRegistered(x.key);
+        html += '<tr class="click" onclick="toggleRef(' + i + ')"><td>' + (i + 1) + '</td><td>' + esc(x.label) + ' <span style="color:var(--ink-soft)">▾</span></td><td class="num">' + x.count + '</td><td>' +
+          (ok ? '<span class="badge ok">Terdaftar sebagai agen</span>' : '<span class="badge warn">Tidak ada di daftar agen</span>') + '</td></tr>' +
+          '<tr id="refRow' + i + '" style="display:none"><td></td><td colspan="3"><ul class="names">' + x.items.map(r => '<li>' + esc(r['NAMA LENGKAP']) + '</li>').join('') + '</ul></td></tr>';
+      });
+      $('refTable').innerHTML = html + '</tbody></table>';
+    }
+    function toggleRef(i) { const r = $('refRow' + i); r.style.display = r.style.display === 'none' ? '' : 'none'; }
+
+    /* ================= KUALITAS DATA ================= */
+    const ISSUE_META = {
+      wa_kosong: ['WhatsApp kosong', 'err'], wa_invalid: ['WhatsApp tidak valid', 'err'], rek_kosong: ['No rekening kosong', 'err'], bank_kosong: ['Nama bank kosong', 'err'],
+      nama_ganda: ['Nama ganda', 'warn'], wa_ganda: ['WhatsApp ganda', 'warn'], rek_ganda: ['Rekening ganda', 'warn'],
+      ref_tidak: ['Perekrut tidak ada di daftar agen', 'warn'], ttl_tahun: ['Tanggal lahir tidak terbaca', 'warn'], jk_kosong: ['Jenis kelamin kosong', 'warn'], kep_lembaga: ['Kepengurusan "Ya" tanpa nama lembaga', 'warn'],
+      l_ketua: ['Nama ketua kosong', 'err'], l_wa_kosong: ['WA ketua/PJ kosong', 'err'], l_wa_invalid: ['WA ketua/PJ tidak valid', 'err'], l_rek_kosong: ['Rekening lembaga kosong', 'err'], l_bank_kosong: ['Bank lembaga kosong', 'err'], l_nama_ganda: ['Nama lembaga ganda', 'warn']
+    };
+    function buildIssues() {
+      registeredNames = null;
+      const out = [], A = DATA.agen, L = DATA.lembaga;
+      const add = (sheet, r, nama, type, detail) => out.push({ sheet, row: r.rowIndex, nama, type, detail: detail || '' });
+      const dup = (rows, keyFn, sheet, nameKey, type) => {
+        const m = new Map();
+        rows.forEach(r => { const k = keyFn(r); if (k) { if (!m.has(k)) m.set(k, []); m.get(k).push(r); } });
+        m.forEach(list => { if (list.length > 1) list.forEach(r => add(sheet, r, r[nameKey], type, 'Sama dengan baris ' + list.filter(x => x !== r).map(x => x.rowIndex).join(', '))); });
+      };
+      A.forEach(r => {
+        const nm = r['NAMA LENGKAP'], wa = normPhone(r['NO WHATSAPP']);
+        if (!wa) add('Agen', r, nm, 'wa_kosong'); else if (!phoneValid(wa)) add('Agen', r, nm, 'wa_invalid', str(r['NO WHATSAPP']));
+        if (!digits(r['NO REKENING'])) add('Agen', r, nm, 'rek_kosong');
+        if (!str(r['NAMA BANK'])) add('Agen', r, nm, 'bank_kosong');
+        if (!birthYear(r['TEMPAT TANGGAL LAHIR'])) add('Agen', r, nm, 'ttl_tahun', str(r['TEMPAT TANGGAL LAHIR']));
+        if (gender(r['JENIS KELAMIN']) === 'Tidak diisi') add('Agen', r, nm, 'jk_kosong', str(r['JENIS KELAMIN']));
+        if (kep(r['MASUK KEPENGURUSAN WAHDAH']) === 'Ya' && !str(r['NAMA LEMBAGA'])) add('Agen', r, nm, 'kep_lembaga');
+        const ref = normName(r['NAMA AGEN YANG MENGAJAK']);
+        if (!NO_REF.has(ref) && !isRegistered(ref)) add('Agen', r, nm, 'ref_tidak', str(r['NAMA AGEN YANG MENGAJAK']));
+      });
+      dup(A, r => normName(r['NAMA LENGKAP']), 'Agen', 'NAMA LENGKAP', 'nama_ganda');
+      dup(A, r => { const w = normPhone(r['NO WHATSAPP']); return phoneValid(w) ? w : ''; }, 'Agen', 'NAMA LENGKAP', 'wa_ganda');
+      dup(A, r => { const d = digits(r['NO REKENING']); return d.length >= 6 ? d : ''; }, 'Agen', 'NAMA LENGKAP', 'rek_ganda');
+      L.forEach(r => {
+        const nm = r['NAMA LEMBAGA'], wa = normPhone(r['NO WA KETUA/PJ LEMBAGA']);
+        if (!str(r['NAMA KETUA LEMBAGA'])) add('Lembaga', r, nm, 'l_ketua');
+        if (!wa) add('Lembaga', r, nm, 'l_wa_kosong'); else if (!phoneValid(wa)) add('Lembaga', r, nm, 'l_wa_invalid', str(r['NO WA KETUA/PJ LEMBAGA']));
+        if (!digits(r['NO REKENING LEMBAGA'])) add('Lembaga', r, nm, 'l_rek_kosong');
+        if (!str(r['NAMA BANK'])) add('Lembaga', r, nm, 'l_bank_kosong');
+      });
+      dup(L, r => normName(r['NAMA LEMBAGA']), 'Lembaga', 'NAMA LEMBAGA', 'l_nama_ganda');
+      return out;
+    }
+    function renderKualitas() {
+      qIssues = buildIssues();
+      const totalRows = DATA.agen.length + DATA.lembaga.length;
+      const errRows = new Set(qIssues.filter(i => ISSUE_META[i.type][1] === 'err').map(i => i.sheet + i.row)).size;
+      const score = totalRows ? Math.round((totalRows - errRows) * 100 / totalRows) : 100;
+      $('qStats').innerHTML =
+        '<div class="stat-card"><div class="num">' + score + '%</div><div class="lbl">Baris tanpa masalah wajib</div></div>' +
+        '<div class="stat-card"><div class="num">' + errRows + '</div><div class="lbl">Baris perlu diperbaiki</div></div>' +
+        '<div class="stat-card"><div class="num">' + qIssues.length + '</div><div class="lbl">Total temuan</div></div>';
+      const counts = {}; qIssues.forEach(i => counts[i.type] = (counts[i.type] || 0) + 1);
+      let chips = '<button class="chip ' + (qFilter ? '' : 'active') + '" onclick="setQ(\'\')">Semua (' + qIssues.length + ')</button>';
+      Object.keys(ISSUE_META).filter(k => counts[k]).forEach(k => {
+        chips += '<button class="chip ' + (qFilter === k ? 'active' : '') + '" onclick="setQ(\'' + k + '\')">' + ISSUE_META[k][0] + ' (' + counts[k] + ')</button>';
+      });
+      $('qChips').innerHTML = chips;
+      const list = qFilter ? qIssues.filter(i => i.type === qFilter) : qIssues, LIMIT = 150;
+      if (!list.length) { $('qTable').innerHTML = '<div class="empty-state">🎉 Tidak ada temuan. Data Anda bersih.</div>'; return; }
+      let html = '<table class="tbl"><thead><tr><th>Sheet</th><th>Baris</th><th>Nama</th><th>Masalah</th><th>Keterangan</th></tr></thead><tbody>';
+      list.slice(0, LIMIT).forEach(i => {
+        const [label, sev] = ISSUE_META[i.type];
+        html += '<tr><td>' + i.sheet + '</td><td>' + i.row + '</td><td>' + esc(i.nama) + '</td><td><span class="badge ' + sev + '">' + label + '</span></td><td>' + esc(i.detail) + '</td></tr>';
+      });
+      html += '</tbody></table>';
+      if (list.length > LIMIT) html += '<div class="note">Menampilkan ' + LIMIT + ' dari ' + list.length + ' temuan. Unduh CSV untuk daftar lengkap.</div>';
+      $('qTable').innerHTML = html;
+    }
+    function setQ(k) { qFilter = k; renderKualitas(); }
+    function exportIssues() {
+      const rows = [['Sheet', 'Baris', 'Nama', 'Masalah', 'Tingkat', 'Keterangan']].concat(qIssues.map(i => [i.sheet, i.row, i.nama, ISSUE_META[i.type][0], ISSUE_META[i.type][1] === 'err' ? 'Perlu diperbaiki' : 'Periksa', i.detail]));
+      saveBlob(toCsv(rows), 'temuan_kualitas_data_' + today() + '.csv', 'text/csv;charset=utf-8');
+    }
+
+    /* ================= EKSPOR ================= */
+    function setExp(v) { expDs = v; setActive('segExp', v); renderEkspor(true); }
+    function expRows() {
+      const isA = expDs === 'agen', rows = isA ? DATA.agen : DATA.lembaga;
+      const q = $('expSearch').value.toLowerCase().trim(), kota = $('expKota').value;
+      return rows.filter(r => {
+        if (q && !Object.keys(r).filter(k => k[0] !== '_').map(k => str(r[k])).join(' ').toLowerCase().includes(q)) return false;
+        if (kota && r._kota !== kota) return false;
+        if (isA) {
+          if ($('expGender').value && gender(r['JENIS KELAMIN']) !== $('expGender').value) return false;
+          if ($('expKep').value && kep(r['MASUK KEPENGURUSAN WAHDAH']) !== $('expKep').value) return false;
+        } else {
+          const pj = $('expPJ').value, has = !!str(r[PJ_COL]);
+          if (pj === 'ada' && !has) return false;
+          if (pj === 'tanpa' && has) return false;
+        }
+        return true;
+      });
+    }
+    function renderEkspor(reset) {
+      const isA = expDs === 'agen', all = isA ? DATA.agen : DATA.lembaga;
+      $('expGender').style.display = $('expKep').style.display = isA ? '' : 'none';
+      $('expPJ').style.display = isA ? 'none' : '';
+      const sel = $('expKota');
+      if (reset || !sel.options.length) {
+        const cities = [...new Set(all.map(r => r._kota).filter(Boolean))].sort();
+        sel.innerHTML = '<option value="">Semua Wilayah</option>' + cities.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+        if (reset) { $('expSearch').value = ''; $('expGender').value = $('expKep').value = $('expPJ').value = ''; }
+      }
+      const rows = expRows(), cols = isA ? AGEN_COLS : LEMBAGA_COLS;
+      $('expInfo').textContent = rows.length + ' dari ' + all.length + ' baris akan diekspor. Pratinjau 5 baris pertama:';
+      let html = '<table class="tbl"><thead><tr>' + cols.concat(['WILAYAH']).map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>';
+      rows.slice(0, 5).forEach(r => { html += '<tr>' + cols.map(c => '<td>' + esc(r[c]) + '</td>').join('') + '<td>' + esc(r._kota) + '</td></tr>'; });
+      $('expPreview').innerHTML = html + '</tbody></table>';
+    }
+    function expMatrix() {
+      const cols = expDs === 'agen' ? AGEN_COLS : LEMBAGA_COLS;
+      return [cols.concat(['WILAYAH (TERDETEKSI)'])].concat(expRows().map(r => cols.map(c => str(r[c])).concat([r._kota || ''])));
+    }
+    function today() { return iso(new Date()); }
+    function toCsv(rows) { return '\uFEFF' + rows.map(r => r.map(c => '"' + str(c).replace(/"/g, '""') + '"').join(',')).join('\r\n'); }
+    function saveBlob(data, name, type) {
+      const url = URL.createObjectURL(new Blob([data], { type }));
+      const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function downloadCsv() { saveBlob(toCsv(expMatrix()), (expDs === 'agen' ? 'data_agen_' : 'data_agen_lembaga_') + today() + '.csv', 'text/csv;charset=utf-8'); }
+    function downloadExcel() {
+      if (typeof XLSX === 'undefined') { alert('Library Excel gagal dimuat. Gunakan tombol CSV atau periksa koneksi internet.'); return; }
+      const ws = XLSX.utils.aoa_to_sheet(expMatrix()), wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, expDs === 'agen' ? 'Data Agen' : 'Data Agen Lembaga');
+      XLSX.writeFile(wb, (expDs === 'agen' ? 'data_agen_' : 'data_agen_lembaga_') + today() + '.xlsx');
+    }
+
+    /* ================= AUTO LOGIN ================= */
+    (function () {
+      const pw = sessionStorage.getItem('adminPw');
+      if (!pw) return;
+      fetchAdmin(pw).then(res => { if (res.success) showDash(res.data); else sessionStorage.removeItem('adminPw'); }).catch(() => {});
+    })();
+  </script>
+</body>
+</html>
